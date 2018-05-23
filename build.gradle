@@ -1,0 +1,114 @@
+/**
+ * buildscript中的声明是gradle脚本自身需要使用的资源,可以声明的资源包括依赖项、第三方插件、maven仓库地址
+ * gradle执行时，会优先执行buildscript代码
+ */
+buildscript {
+    ext {
+        springBootVersion = '1.4.3.RELEASE'
+    }
+    repositories {
+        maven { url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+        classpath("org.hidetake:gradle-ssh-plugin:2.8.0")
+    }
+}
+
+/**
+ * 声明引用的插件
+ */
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'org.hidetake.ssh'
+apply from: 'libraries.gradle'
+
+group 'com.xxx'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+/**
+ * 配置文件
+ */
+configurations {
+    all*.exclude module: 'spring-boot-starter-logging'
+    all*.exclude module: 'junit'
+}
+
+dependencies {
+
+    //springboot
+    compile('org.springframework.boot:spring-boot-starter-aop')
+    compile('org.springframework.boot:spring-boot-starter-data-jpa')
+    compile('org.springframework.boot:spring-boot-starter-web')
+
+    //database
+    compile('mysql:mysql-connector-java')
+//    compile ('com.oracle:ojdbc6:11.2.0.3')
+    compile('org.hibernate:hibernate-validator')
+    compile('org.springframework.boot:spring-boot-starter-log4j2')
+    compile("joda-time:joda-time:2.9.7")
+
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile(group: 'org.testng', name: 'testng', version: '6.10')
+
+    // swagger
+    compile 'io.springfox:springfox-swagger2:2.6.1'
+    compile 'io.springfox:springfox-swagger-ui:2.6.1'
+
+    //kafka
+    compile "org.apache.kafka:kafka_2.10:0.9.0.1"
+    compile "org.apache.kafka:kafka-clients:0.9.0.1"
+
+    //
+    compile libraries.http_client
+    compile libraries.commons_lang3
+    compile libraries.sl4j
+    compile libraries.fast_json
+//    compile libraries.jackson
+    testCompile libraries.junit
+}
+
+test {
+    // enable testng
+    useTestNG()
+}
+
+
+remotes {
+    devServer {
+        host = '10.10.10.10'
+        user = 'root'
+        identity = file("${System.properties['user.home']}/.ssh/id_rsa")
+    }
+}
+
+/**
+ * 自定义任务，本地发布远程服务至服务器
+ */
+task deployDev {
+    doLast {
+        ssh.run {
+            session(remotes.devServer) {
+                def archivesBaseName = project.archivesBaseName
+                def jarFile = "xxxx.jar"
+                def logFile = "xxxxxxx.log"
+                def deployDir = 'xxxxxxxx'
+                def pid = execute "jps -ml | grep $jarFile | awk -F ' ' '{print \$1}'"
+                execute "kill $pid", ignoreError: true
+                remove "$deployDir/$jarFile", "$deployDir/$logFile"
+                put from: "$buildDir/libs/$jarFile", into: "$deployDir/$jarFile"
+                execute "nohup java -jar $deployDir/$jarFile > $deployDir/$logFile 2>&1 &"
+            }
+        }
+    }
+}

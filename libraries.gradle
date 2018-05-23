@@ -1,0 +1,35 @@
+ext {
+    versions = [
+		junit:						'4.9',
+		http_client:				'4.5.2',
+		commons_lang3:				'3.5',
+		log4j:   					'2.6.2',
+		sl4j:						'1.7.22',
+		fast_json:					'1.2.22',
+		joda_time:					'2.9.7',
+		common_io:					'2.5',
+		common_codec:				'1.10',
+		bean_utils:					'1.9.3',
+		aspectj:					'1.8.9',
+		spring:						'3.2.7.RELEASE',
+		jackson:					'2.8.5',
+		thrift:						'0.9.3'
+    ]
+
+    libraries = [
+		/** Junit **/
+		junit:						"junit:junit:${versions.junit}",
+		http_client:				"org.apache.httpcomponents:httpclient:${versions.http_client}",
+		commons_lang3:				"org.apache.commons:commons-lang3:${versions.commons_lang3}",
+		sl4j:						"org.slf4j:slf4j-api:${versions.sl4j}",
+		fast_json:					"com.alibaba:fastjson:${versions.fast_json}",
+		joda_time:					"joda-time:joda-time:${versions.joda_time}",
+		common_io:					"commons-io:commons-io:${versions.common_io}",
+		common_codec:				"commons-codec:commons-codec:${versions.common_codec}",
+		bean_utils:					"commons-beanutils:commons-beanutils:${versions.bean_utils}",
+		log4j_api:					 "org.apache.logging.log4j:log4j-api:${versions.log4j}",
+		log4j_core: 				"org.apache.logging.log4j:log4j-core:${versions.log4j}",
+		log4j_slf4j_impl: 			"org.apache.logging.log4j:log4j-slf4j-impl:${versions.log4j}",
+		log4j_web:					"org.apache.logging.log4j:log4j-web:${versions.log4j}",
+	]
+}
